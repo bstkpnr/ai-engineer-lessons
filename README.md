@@ -8,9 +8,9 @@ Her gün kendi klasöründe; yazıyı okurken ilgili klasördeki kodları çalı
 
 | Gün | Konu | Kodlar |
 |---|---|---|
-| 1 | [Bir mobil geliştirici neden yön değiştirir?]https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-1-bir-mobil-geli%C5%9Ftirici-neden-y%C3%B6n-de%C4%9Fi%C5%9Ftirir-c1e50dbb3ee3 | [`gun-1`](./gun-1) |
+| 1 | [Bir mobil geliştirici neden yön değiştirir?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-1-bir-mobil-geli%C5%9Ftirici-neden-y%C3%B6n-de%C4%9Fi%C5%9Ftirir-c1e50dbb3ee3) | [`gun-1`](./gun-1) |
 | 2 | [LLM'ler aslında nasıl çalışıyor?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-2-llmler-asl%C4%B1nda-nas%C4%B1l-%C3%A7al%C4%B1%C5%9F%C4%B1yor-64bc8b1a2598) | [`gun-2`](./gun-2) |
-| 3 | [Model metni nasıl anlıyor?]https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-3-model-metni-nas%C4%B1l-anl%C4%B1yor-4b68cec111b1 | [`gun-3`](./gun-3) |
+| 3 | [Model metni nasıl anlıyor?] (https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-3-model-metni-nas%C4%B1l-anl%C4%B1yor-4b68cec111b1) | [`gun-3`](./gun-3) |
 
 ## Başlarken
 
