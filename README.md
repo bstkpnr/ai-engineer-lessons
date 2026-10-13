@@ -18,8 +18,8 @@ Her gün kendi klasöründe; yazıyı okurken ilgili klasördeki kodları çalı
 
 1. Depoyu klonla:
    ```bash
-   git clone https://github.com/KULLANICI_ADIN/ai-engineer-oluyoruz.git
-   cd ai-engineer-oluyoruz
+   git clone https://github.com/bstkpnr/ai-engineer-lessons.git
+   cd ai-engineer-lessons
    ```
 2. API anahtarını ekle (Gün 1 ve Gün 2 için gerekli):
    ```bash
