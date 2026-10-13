@@ -1,0 +1,13 @@
+{
+  "name": "gun-1-ilk-istek",
+  "version": "1.0.0",
+  "description": "Gün 1: Modelle ilk konuşma",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file=../.env index.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}

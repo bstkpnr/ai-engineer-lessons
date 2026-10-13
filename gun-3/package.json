@@ -1,0 +1,16 @@
+{
+  "name": "gun-3-model-metni-nasil-anliyor",
+  "version": "1.0.0",
+  "description": "Gün 3: Tokenizer, embedding ve attention deneyleri",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "tokenizer": "node tokenizer.mjs",
+    "embedding": "node embedding.mjs",
+    "attention": "node attention.mjs"
+  },
+  "dependencies": {
+    "js-tiktoken": "^1.0.21",
+    "@huggingface/transformers": "^4.3.1"
+  }
+}

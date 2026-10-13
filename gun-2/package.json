@@ -1,0 +1,16 @@
+{
+  "name": "gun-2-llm-kavramlari",
+  "version": "1.0.0",
+  "description": "Gün 2: Token, temperature, max_tokens ve hafızasızlık deneyleri",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "tokens": "node --env-file=../.env tokens.mjs",
+    "temperature": "node --env-file=../.env temperature.mjs",
+    "limit": "node --env-file=../.env limit.mjs",
+    "memory": "node --env-file=../.env memory.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}
