@@ -1,0 +1,16 @@
+{
+  "name": "gun-4-model-cevabi-nasil-uretiyor",
+  "version": "1.0.0",
+  "description": "Gün 4: Temperature, örnekleme stratejileri, mini eğitim ve prompt caching deneyleri",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "temperature": "node temperature.mjs",
+    "sampler": "node sampler.mjs",
+    "train": "node train.mjs",
+    "caching": "node --env-file=../.env caching.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}
