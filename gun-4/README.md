@@ -1,6 +1,6 @@
 # Gün 4: Model cevabı nasıl üretiyor?
 
-📖 Yazı: [AI Engineer Oluyoruz — Gün 4](GUN_4_LINKI)
+📖 Yazı: [AI Engineer Oluyoruz — Gün 4](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-4-model-cevab%C4%B1-nas%C4%B1l-%C3%BCretiyor-c5f714087470?postPublishedType=initial)
 
 İlk üç deney **API anahtarı gerektirmiyor** ve hiçbir kütüphane kurmadan çalışıyor.
 
