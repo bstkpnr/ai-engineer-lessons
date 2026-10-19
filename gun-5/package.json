@@ -1,0 +1,17 @@
+{
+  "name": "gun-5-prompt-engineering",
+  "version": "1.0.0",
+  "description": "Gün 5: Prompt engineering ile uygulama yorumu analizcisi",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "bad": "node --env-file=../.env 01-bad-prompt.mjs",
+    "clear": "node --env-file=../.env 02-clear-prompt.mjs",
+    "system": "node --env-file=../.env 03-system-and-tags.mjs",
+    "few-shot": "node --env-file=../.env 04-few-shot.mjs",
+    "analyze": "node --env-file=../.env reviewAnalyzer.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}
