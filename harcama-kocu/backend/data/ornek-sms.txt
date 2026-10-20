@@ -1,0 +1,21 @@
+BANKAM: 4543 1234 5678 9012 nolu kartinizdan 245,90 TL MIGROS SANAL MARKET islemi yapilmistir.
+BANKAM: Kartinizdan 149,99 TL NETFLIX.COM islemi yapilmistir.
+BANKAM: Kartinizdan 1.250,00 TL SHELL PETROL ISTANBUL islemi yapilmistir.
+BANKAM: Kartinizdan 312,50 TL GETIR YEMEK islemi yapilmistir.
+BANKAM: Kartinizdan 59,99 TL SPOTIFY islemi yapilmistir.
+BANKAM: Kartinizdan 79,99 TL YOUTUBE PREMIUM islemi yapilmistir.
+BANKAM: Kartinizdan 487,30 TL MİGROS MMM 4521 islemi yapilmistir.
+BANKAM: Kartinizdan 285,00 TL YEMEKSEPETI islemi yapilmistir.
+BANKAM: Kartinizdan 649,90 TL TURKCELL FATURA islemi yapilmistir.
+BANKAM: Kartinizdan 1.899,00 TL TRENDYOL islemi yapilmistir.
+BANKAM: Kartinizdan 245,00 TL TRENDYOL YEMEK islemi yapilmistir.
+BANKAM: Kartinizdan 3.000,00 TL ATM NAKIT CEKIM islemi yapilmistir.
+BANKAM: TRENDYOL islemi icin 450,00 TL iade kartiniza yansimistir.
+BANKAM: Kartinizdan 132,40 TL STARBUCKS KADIKOY islemi yapilmistir.
+BANKAM: Sifreniz basariyla degistirilmistir.
+BANKAM: Kartinizdan 412,75 TL ENERJISA ELEKTRIK FATURA islemi yapilmistir.
+BANKAM: Kartinizdan 356,00 TL GETIR YEMEK islemi yapilmistir.
+BANKAM: Kartinizdan 218,60 TL ECZANE islemi yapilmistir.
+BANKAM: Bu hafta sonu restoran harcamalariniza %10 puan! Kampanyaya katilmak icin KATIL yazip gonderin.
+BANKAM: Kartinizdan 9.99 USD STEAM GAMES islemi yapilmistir.
+BANKAM: Kartinizdan 298,00 TL YEMEKSEPETI islemi yapilmistir.

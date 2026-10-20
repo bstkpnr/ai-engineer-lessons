@@ -1,0 +1,17 @@
+{
+  "name": "harcama-kocu-backend",
+  "version": "1.0.0",
+  "description": "Harcama Koçu için API",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file=../../.env server.mjs",
+    "demo": "DEMO_MODE=true node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
