@@ -1,6 +1,7 @@
 import { fetch as expoFetch } from "expo/fetch";
 import type { Summary } from "./summary";
-import type { ChatMessage, Debug, ExtractResponse } from "./types";
+import type { ChatMessage, Debug, ExtractResponse, KayitliIslem, ToolCall } from "./types";
+import { toolPayload } from "./summary";
 
 // .env dosyasındaki EXPO_PUBLIC_API_URL değeri derleme sırasında koda gömülür
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
@@ -56,20 +57,26 @@ function decodeUtf8(bytes: Uint8Array) {
   return out;
 }
 
-type StreamEvent = { type: "text"; text: string } | { type: "done"; debug: Debug } | { type: "error"; error: string };
+type StreamEvent =
+  | { type: "text"; text: string }
+  | ({ type: "tool" } & ToolCall)
+  | { type: "done"; debug: Debug }
+  | { type: "error"; error: string };
 
 // Koçun cevabını parça parça okur (streaming). Her satır bir JSON olayı.
 export async function streamChat(
   summary: Summary,
+  islemler: KayitliIslem[],
   messages: Pick<ChatMessage, "role" | "content">[],
   onText: (text: string) => void,
+  onTool: (call: ToolCall) => void,
 ): Promise<Debug | undefined> {
   let res;
   try {
     res = await expoFetch(`${API_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ summary, messages }),
+      body: JSON.stringify({ summary, messages, islemler: toolPayload(islemler) }),
     });
   } catch {
     throw unreachable();
@@ -87,6 +94,7 @@ export async function streamChat(
     if (!line.trim()) return;
     const event = JSON.parse(line) as StreamEvent;
     if (event.type === "text") onText(event.text);
+    else if (event.type === "tool") onTool({ name: event.name, input: event.input, aciklama: event.aciklama, hata: event.hata });
     else if (event.type === "done") debug = event.debug;
     else if (event.type === "error") throw new ApiError(event.error);
   };

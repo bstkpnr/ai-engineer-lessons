@@ -10,14 +10,17 @@ import type { ChatMessage } from "../types";
 
 const SUGGESTIONS = [
   "Bu ay neden bu kadar çok harcadım?",
-  "Hangi aboneliklerden vazgeçebilirim?",
-  "En çok nereye harcıyorum?",
-  "Biraz para biriktirmek için ne yapabilirim?",
+  "Migros'a toplam ne kadar harcadım?",
+  "En büyük 3 harcamam neler?",
+  "Yemek siparişini %30 azaltsam ne kadar biriktiririm?",
 ];
 
 // Model hafızasız (Gün 2): Sohbet geçmişini her istekte biz gönderiyoruz.
 // Context'i ve maliyeti sınırlamak için sadece son mesajları gönderiyoruz.
 const HISTORY_LIMIT = 10;
+
+// Model kurala rağmen Markdown kullanırsa ekranda yıldızlar görünmesin (çıktıya körü körüne güvenme, Gün 5)
+const plain = (text: string) => text.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#{1,6}\s+/gm, "");
 
 export function CoachScreen() {
   const { islemler, messages, setMessages, devMode } = useStore();
@@ -41,10 +44,17 @@ export function CoachScreen() {
 
     try {
       const payload = history.slice(-HISTORY_LIMIT).map(({ role, content }) => ({ role, content }));
-      const debug = await streamChat(summary, payload, (delta) => {
-        appendToLast((m) => ({ ...m, content: m.content + delta }));
-        scrollRef.current?.scrollToEnd({ animated: false });
-      });
+      const debug = await streamChat(
+        summary,
+        islemler,
+        payload,
+        (delta) => {
+          appendToLast((m) => ({ ...m, content: m.content + delta }));
+          scrollRef.current?.scrollToEnd({ animated: false });
+        },
+        // Koç bir araç çağırdığında cevabın üstünde kısa bir not göster (Gün 7)
+        (call) => appendToLast((m) => ({ ...m, tools: [...(m.tools ?? []), call] })),
+      );
       appendToLast((m) => ({ ...m, debug }));
     } catch (e) {
       const message = e instanceof ApiError ? e.message : "Beklenmeyen bir hata oluştu.";
@@ -79,12 +89,19 @@ export function CoachScreen() {
 
         {messages.map((m, i) => (
           <View key={i} style={{ gap: 6 }}>
+            {m.tools?.map((t, j) => (
+              <View key={j} style={[styles.tool, t.hata && styles.toolError]}>
+                <Text style={styles.toolText}>
+                  {t.hata ? "⚠️" : "🧮"} {t.aciklama}
+                </Text>
+              </View>
+            ))}
             <View style={[styles.bubble, m.role === "user" ? styles.user : styles.assistant, m.error && styles.errorBubble]}>
               {m.role === "assistant" && !m.content && streaming && i === messages.length - 1 ? (
                 <ActivityIndicator color={colors.primary} />
               ) : (
                 <Text style={[styles.bubbleText, m.role === "user" && styles.userText, m.error && styles.errorText]}>
-                  {m.content}
+                  {m.role === "assistant" ? plain(m.content) : m.content}
                 </Text>
               )}
             </View>
@@ -145,5 +162,15 @@ const styles = StyleSheet.create({
   },
   send: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
   sendText: { color: "#fff", fontSize: 20, fontWeight: "800" },
+  tool: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.primarySoft,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    maxWidth: "92%",
+  },
+  toolError: { backgroundColor: colors.dangerSoft },
+  toolText: { fontSize: 12, color: colors.primary, fontWeight: "600" },
   disclaimer: { fontSize: 11, color: colors.muted, textAlign: "center", paddingVertical: 6 },
 });

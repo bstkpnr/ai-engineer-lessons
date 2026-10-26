@@ -41,6 +41,8 @@ export type Debug = {
   usage: Usage;
   maliyet_usd?: number | null;
   gecmis_mesaj_sayisi?: number;
+  adim?: number;
+  araclar?: ToolCall[];
   prompt?: { system: string; user: string } | null;
 };
 
@@ -51,4 +53,13 @@ export type ExtractResponse = {
   debug: Debug;
 };
 
-export type ChatMessage = { role: "user" | "assistant"; content: string; debug?: Debug; error?: boolean };
+// Koçun çağırdığı bir araç (Gün 7)
+export type ToolCall = { name: string; input: Record<string, unknown>; aciklama: string; hata: string | null };
+
+export type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  debug?: Debug;
+  error?: boolean;
+  tools?: ToolCall[];
+};

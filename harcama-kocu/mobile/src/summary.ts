@@ -2,6 +2,7 @@ import { kategoriLabel } from "./labels";
 import type { Kategori, KayitliIslem } from "./types";
 
 // Tüm hesaplar burada, kodla yapılıyor. Model sadece bu hazır rakamları yorumluyor.
+// Detaylı sorular için koç işlem listesine değil, backend'deki araçlara başvuruyor (Gün 7).
 export type Summary = ReturnType<typeof buildSummary>;
 
 const round = (n: number) => Math.round(n * 100) / 100;
@@ -64,13 +65,10 @@ export function buildSummary(islemler: KayitliIslem[]) {
     abonelikler,
     abonelik_toplami,
     doviz_harcamalari: doviz.map((i) => ({ satici: i.satici, tutar: i.tutar, para_birimi: i.para_birimi })),
-    // Modele her işlemin dökümünü değil, sadece kısa bir listesini gönderiyoruz (context ve maliyet için)
-    islemler: islemler.slice(0, 60).map((i) => ({
-      satici: i.satici,
-      kategori: i.kategori,
-      tip: i.tip,
-      tutar: i.tutar,
-      para_birimi: i.para_birimi,
-    })),
   };
+}
+
+// Koçun araçlarının üzerinde çalışacağı sade işlem listesi
+export function toolPayload(islemler: KayitliIslem[]) {
+  return islemler.map(({ satici, tutar, kategori, tip, para_birimi }) => ({ satici, tutar, kategori, tip, para_birimi }));
 }

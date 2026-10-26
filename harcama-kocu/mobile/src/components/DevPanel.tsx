@@ -28,8 +28,9 @@ export function DevPanel({ debug, title }: { debug?: Debug; title: string }) {
     ["stop_reason", debug.stop_reason ?? "—"],
     ["toplam süre", `${debug.sure_ms} ms`],
   ];
-  if (debug.ilk_token_ms != null) rows.splice(7, 0, ["ilk token", `${debug.ilk_token_ms} ms`]);
+  if (debug.ilk_token_ms != null) rows.splice(6, 0, ["ilk token", `${debug.ilk_token_ms} ms`]);
   if (debug.gecmis_mesaj_sayisi != null) rows.push(["modele giden mesaj", `${debug.gecmis_mesaj_sayisi} (geçmiş dahil)`]);
+  if (debug.adim != null) rows.push(["model adımı", `${debug.adim} (araç çağrısı: ${debug.araclar?.length ?? 0})`]);
 
   return (
     <View style={styles.panel}>
@@ -39,6 +40,11 @@ export function DevPanel({ debug, title }: { debug?: Debug; title: string }) {
           <Text style={styles.key}>{k}</Text>
           <Text style={styles.value}>{v}</Text>
         </View>
+      ))}
+      {debug.araclar?.map((a, i) => (
+        <Text key={i} style={styles.call}>
+          → {a.name}({JSON.stringify(a.input)}){a.hata ? `  ✗ ${a.hata}` : ""}
+        </Text>
       ))}
       {debug.prompt ? (
         <Pressable onPress={() => setShowPrompt((s) => !s)}>
@@ -63,6 +69,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
   key: { ...mono, color: colors.devMuted },
   value: { ...mono, color: colors.devInk, flexShrink: 1, textAlign: "right" },
+  call: { ...mono, color: colors.accent, marginTop: 2 },
   link: { ...mono, color: colors.accent, marginTop: 6 },
   prompt: { ...mono, color: colors.devInk, marginTop: 6, lineHeight: 17 },
 });

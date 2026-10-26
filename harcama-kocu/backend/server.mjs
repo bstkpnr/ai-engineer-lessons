@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { maskSensitive } from "./src/mask.mjs";
 import { costOf, getStats, recordError, recordUsage } from "./src/stats.mjs";
+import { sanitizeIslemler } from "./src/tools.mjs";
 
 const DEMO_MODE = process.env.DEMO_MODE === "true" || !process.env.ANTHROPIC_API_KEY;
 
@@ -56,6 +57,8 @@ app.post("/extract", async (req, res) => {
 
 app.post("/chat", async (req, res) => {
   const { summary, messages } = req.body ?? {};
+  // Koçun araçları bu işlemler üzerinde çalışır (Gün 7)
+  const islemler = sanitizeIslemler(req.body?.islemler);
   const valid =
     summary &&
     Array.isArray(messages) &&
@@ -74,7 +77,7 @@ app.post("/chat", async (req, res) => {
   try {
     // Kullanıcı mesajlarındaki hassas verileri de maskele
     const safeMessages = messages.map((m) => ({ role: m.role, content: maskSensitive(m.content).masked }));
-    const debug = await streamCoach({ summary, messages: safeMessages }, (text) => send({ type: "text", text }));
+    const debug = await streamCoach({ summary, messages: safeMessages, islemler }, send);
     recordUsage(debug.usage);
     send({ type: "done", debug: { ...debug, maliyet_usd: costOf(debug.usage) } });
   } catch (error) {

@@ -52,39 +52,77 @@ export async function extractDemo(text) {
   };
 }
 
-const fmt = (n) => n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " TL";
+import { fmt, runTool } from "./tools.mjs";
 
-function demoAnswer(summary, question) {
+const CATEGORY_WORDS = [
+  [/market/, "market"], [/yemek|sipariş/, "yemek"], [/fatura/, "fatura"], [/abonelik/, "abonelik"],
+  [/ulaşım|benzin|akaryakıt/, "ulasim"], [/alışveriş/, "alisveris"], [/nakit/, "nakit"],
+  [/sağlık|eczane/, "saglik"], [/eğlence|oyun/, "eglence"],
+];
+
+// Demo modunda modelin araç seçimini basit kurallarla taklit ediyoruz
+function planDemo(question, islemler) {
   const q = question.toLocaleLowerCase("tr");
-  const top = summary.kategoriler?.[0];
-  if (/yatır|hisse|fon|kripto|borsa|altın|dolar al/.test(q)) {
-    return "Yatırım konusunda öneri veremiyorum; bu bir yatırım danışmanının işi. Ama harcamalarında tasarruf edebileceğin alanları birlikte bulabiliriz. İstersen aboneliklerine bakalım mı?";
-  }
-  if (/abonelik/.test(q)) {
-    const list = (summary.abonelikler ?? []).map((a) => `${a.satici} (${fmt(a.tutar)})`).join(", ");
-    return list
-      ? `Düzenli ödediğin abonelikler: ${list}. Toplamı ${fmt(summary.abonelik_toplami)}. Benzer işi gören iki abonelik varsa birini iptal etmeyi düşünebilirsin.`
-      : "Eklediğin harcamalarda bir abonelik görmüyorum.";
-  }
-  if (top) {
-    return `En çok harcamayı ${top.etiket} kategorisinde yapmışsın: ${fmt(top.tutar)}, toplamın %${top.yuzde} kadarı. Toplam harcaman ${fmt(summary.toplam_harcama)}. Tasarruf için ilk bakılacak yer burası olabilir.`;
-  }
-  return "Henüz yorum yapabileceğim bir harcama eklemedin. Ekle sekmesinden birkaç SMS yapıştırarak başlayabilirsin.";
+  if (/yatır|hisse|fon|kripto|borsa|altın/.test(q)) return { refuse: true };
+  const kategori = CATEGORY_WORDS.find(([re]) => re.test(q))?.[1];
+  const percent = q.match(/%\s?(\d+)|yüzde\s?(\d+)/);
+  if (percent && kategori) return { tool: "tasarruf_hesapla", input: { kategori, azaltma_yuzdesi: Number(percent[1] ?? percent[2]) } };
+  if (/en büyük|en pahalı|en yüksek/.test(q)) return { tool: "en_buyuk_islemler", input: { adet: 3, ...(kategori ? { kategori } : {}) } };
+  const seller = islemler.map((i) => i.satici).find((s) => q.includes(s.toLocaleLowerCase("tr").split(" ")[0]));
+  if (seller) return { tool: "satici_ara", input: { satici: seller.split(" ")[0] } };
+  if (kategori) return { tool: "kategori_toplami", input: { kategori } };
+  return {};
 }
 
-export async function streamCoachDemo({ summary, messages }, onText) {
-  const answer = demoAnswer(summary, messages.at(-1)?.content ?? "");
+function demoText(plan, result, summary) {
+  if (plan.refuse) {
+    return "Yatırım konusunda öneri veremiyorum; bu bir yatırım danışmanının işi. Ama harcamalarında tasarruf edebileceğin alanları birlikte bulabiliriz.";
+  }
+  const r = result?.sonuc;
+  switch (plan.tool) {
+    case "kategori_toplami":
+      return `Bu kategoride ${r.islem_sayisi} harcaman var, toplamı ${fmt(r.net_toplam)}. Ortalama bir işlem ${fmt(r.ortalama_islem)} tutuyor.`;
+    case "satici_ara":
+      return r.islem_sayisi
+        ? `${plan.input.satici} için ${r.islem_sayisi} işlem buldum, toplam ${fmt(r.net_toplam)}.`
+        : `${plan.input.satici} adına bir işlem bulamadım.`;
+    case "en_buyuk_islemler":
+      return "En büyük harcamaların:\n" + r.islemler.map((i) => `- ${i.satici}: ${fmt(i.tutar)}`).join("\n");
+    case "tasarruf_hesapla":
+      return `Bu kategoride şu an ${fmt(r.mevcut_harcama)} harcıyorsun. %${r.azaltma_yuzdesi} azaltırsan ${fmt(r.tasarruf)} tasarruf edersin; yeni harcaman ${fmt(r.yeni_harcama)} olur.`;
+    default: {
+      const top = summary.kategoriler?.[0];
+      return top
+        ? `En çok harcamayı ${top.etiket} kategorisinde yapmışsın: ${fmt(top.tutar)}. Toplam harcaman ${fmt(summary.toplam_harcama)}.`
+        : "Henüz yorum yapabileceğim bir harcama eklemedin.";
+    }
+  }
+}
+
+export async function streamCoachDemo({ summary, messages, islemler }, onEvent) {
   const started = Date.now();
-  for (const word of answer.split(/(?<= )/)) {
+  const plan = planDemo(messages.at(-1)?.content ?? "", islemler);
+  const araclar = [];
+  let result;
+  if (plan.tool) {
+    await new Promise((r) => setTimeout(r, 300));
+    result = runTool(plan.tool, plan.input, islemler);
+    const call = { name: plan.tool, input: plan.input, aciklama: result.aciklama, hata: result.hata ?? null };
+    araclar.push(call);
+    onEvent({ type: "tool", ...call });
+  }
+  for (const word of demoText(plan, result, summary).split(/(?<= )/)) {
     await new Promise((r) => setTimeout(r, 35));
-    onText(word);
+    onEvent({ type: "text", text: word });
   }
   return {
     model: "demo",
     stop_reason: "demo",
     sure_ms: Date.now() - started,
-    ilk_token_ms: 35,
+    ilk_token_ms: plan.tool ? 335 : 35,
     usage: null,
+    adim: plan.tool ? 2 : 1,
+    araclar,
     gecmis_mesaj_sayisi: messages.length,
   };
 }
