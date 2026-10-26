@@ -6,7 +6,7 @@ Banka SMS'lerini yapıştırıyorsun; uygulama harcamaları çıkarıp kategoril
 
 | Ekle | Harcamalar | Koç |
 |---|---|---|
-| ![Ekle](screenshots/1-ekle.png) | ![Harcamalar](screenshots/2-harcamalar.png) | ![Koç](screenshots/3-koc.png) (screenshots/5-koc2.png) |
+| ![Ekle](screenshots/1-ekle.png) | ![Harcamalar](screenshots/2-harcamalar.png) | ![Koç](screenshots/3-koc.png) |(screenshots/5-koc2.png)
 
 ## Projenin en önemli kuralı
 
