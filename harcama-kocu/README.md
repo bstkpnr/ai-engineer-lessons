@@ -4,9 +4,9 @@
 
 Banka SMS'lerini yapıştırıyorsun; uygulama harcamaları çıkarıp kategorilere ayırıyor, özetini gösteriyor ve harcamaların hakkında bir koçla sohbet etmeni sağlıyor.
 
-| Ekle | Harcamalar | Koç |
-|---|---|---|
-| ![Ekle](screenshots/1-ekle.png) | ![Harcamalar](screenshots/2-harcamalar.png) | ![Koç](screenshots/3-koc.png) |(screenshots/5-koc2.png)
+| Ekle | Harcamalar | Koç | Koç (devam) |
+|---|---|---|---|
+| ![Ekle](screenshots/1-ekle.png) | ![Harcamalar](screenshots/2-harcamalar.png) | ![Koç](screenshots/3-koc.png) | ![Koç (devam)](screenshots/5-koc2.png) |
 
 ## Projenin en önemli kuralı
 
