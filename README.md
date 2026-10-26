@@ -13,7 +13,8 @@ Her gün kendi klasöründe; yazıyı okurken ilgili klasördeki kodları çalı
 | 3 | [Model metni nasıl anlıyor?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-3-model-metni-nas%C4%B1l-anl%C4%B1yor-4b68cec111b1) | [`gun-3`](./gun-3) |
 | 4 | [Model Cevabı Nasıl Üretiyor?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-4-model-cevab%C4%B1-nas%C4%B1l-%C3%BCretiyor-c5f714087470?postPublishedType=initial) | [`gun-4`](./gun-4) |
 | 5| [System Prompt, Few-Shot ve Çıktı Doğrulama?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-5-system-prompt-few-shot-ve-%C3%A7%C4%B1kt%C4%B1-do%C4%9Frulama-e4fe86af895a?postPublishedType=initial) | [`gun-5`](./gun-5) |
-| 6| [5 Günde Öğrendiklerimle Bir Mini Uygulama?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-6-5-g%C3%BCnde-%C3%B6%C4%9Frendiklerimle-bir-mini-uygulama-605b92cb4ac3?postPublishedType=initial) | [`gun-6`](./gun-6) |
+| 6| [5 Günde Öğrendiklerimle Bir Mini Uygulama?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-6-5-g%C3%BCnde-%C3%B6%C4%9Frendiklerimle-bir-mini-uygulama-605b92cb4ac3?postPublishedType=initial) | [`gun-6`](./harcama-kocu) |
+| 7| [Koçuma Hesap Makinesi Verdim](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-7-ko%C3%A7uma-hesap-makinesi-verdim-af729110f2d1?postPublishedType=initial) | [`gun-7`](./harcama-kocu) |
 
 ## Başlarken
 
