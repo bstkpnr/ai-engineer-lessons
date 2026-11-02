@@ -3,20 +3,21 @@
 import { validateTransaction } from "./schema.mjs";
 
 const MERCHANTS = [
-  [/m[iİı]gros/i, "Migros", "market"],
-  [/a101|bim\b|şok|sok market|carrefour/i, "Market", "market"],
-  [/getir.*yemek|yemeksepeti|trendyol yemek/i, "Yemek siparişi", "yemek"],
-  [/starbucks|kahve|cafe/i, "Kafe", "yemek"],
-  [/netflix/i, "Netflix", "abonelik"],
-  [/spotify/i, "Spotify", "abonelik"],
-  [/youtube/i, "YouTube Premium", "abonelik"],
-  [/shell|opet|bp\b|petrol/i, "Akaryakıt", "ulasim"],
-  [/uber|bitaksi|istanbulkart|metro/i, "Ulaşım", "ulasim"],
-  [/turkcell|vodafone|elektrik|enerjisa|igdas|su idaresi|fatura/i, "Fatura", "fatura"],
-  [/trendyol|hepsiburada|amazon|zara/i, "Online alışveriş", "alisveris"],
-  [/eczane|hastane/i, "Sağlık", "saglik"],
-  [/sinema|biletix|steam/i, "Eğlence", "eglence"],
-  [/atm|nakit/i, "Nakit çekim", "nakit"],
+  [/m[iİı]gros/i, "Migros", "market", "süpermarket zinciri"],
+  [/a101|bim\b|şok|sok market|carrefour/i, "Market", "market", "süpermarket"],
+  [/getir.*yemek|yemeksepeti|trendyol yemek/i, "Yemek siparişi", "yemek", "online yemek siparişi"],
+  [/starbucks|kahve|cafe/i, "Starbucks", "yemek", "kahve zinciri"],
+  [/netflix/i, "Netflix", "abonelik", "dijital video aboneliği"],
+  [/spotify/i, "Spotify", "abonelik", "dijital müzik aboneliği"],
+  [/youtube/i, "YouTube Premium", "abonelik", "dijital video aboneliği"],
+  [/shell|opet|bp\b|petrol/i, "Shell", "ulasim", "akaryakıt istasyonu"],
+  [/uber|bitaksi|istanbulkart|metro/i, "Ulaşım", "ulasim", "toplu taşıma ve taksi"],
+  [/turkcell|vodafone/i, "Turkcell", "fatura", "mobil hat faturası"],
+  [/elektrik|enerjisa|igdas|su idaresi|fatura/i, "Enerjisa", "fatura", "elektrik faturası"],
+  [/trendyol|hepsiburada|amazon|zara/i, "Trendyol", "alisveris", "online alışveriş sitesi"],
+  [/eczane|hastane/i, "Eczane", "saglik", "eczane"],
+  [/sinema|biletix|steam/i, "Steam", "eglence", "dijital oyun mağazası"],
+  [/atm|nakit/i, "ATM", "nakit", "nakit para çekimi"],
 ];
 const SKIP = /şifre|sifre|kampanya|bakiye|puan kazan|hosgeldin|hoşgeldin/i;
 const AMOUNT = /(\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(TL|TRY|USD|EUR|\$|€)/i;
@@ -30,12 +31,13 @@ export async function extractDemo(text) {
       atlananlar.push({ kaynak: line, neden: "Harcama bilgisi bulunamadı" });
       continue;
     }
-    const [, satici = "Diğer", kategori = "diger"] = MERCHANTS.find(([re]) => re.test(line)) ?? [];
+    const [, satici = "Diğer", kategori = "diger", aciklama = ""] = MERCHANTS.find(([re]) => re.test(line)) ?? [];
     const cur = amount[2].toUpperCase();
     islemler.push(
       validateTransaction({
         kaynak: line,
         satici,
+        aciklama,
         tutar_metin: amount[1],
         para_birimi: cur === "$" ? "USD" : cur === "€" ? "EUR" : cur === "TL" ? "TRY" : cur,
         kategori,
@@ -48,7 +50,7 @@ export async function extractDemo(text) {
   return {
     islemler,
     atlananlar,
-    debug: { model: "demo", stop_reason: "demo", sure_ms: 500, usage: null, prompt: null },
+    debug: { model: "demo", temperature: 0, stop_reason: "demo", sure_ms: 500, usage: null, prompt: null },
   };
 }
 
@@ -66,6 +68,8 @@ function planDemo(question, islemler) {
   if (/yatır|hisse|fon|kripto|borsa|altın/.test(q)) return { refuse: true };
   const kategori = CATEGORY_WORDS.find(([re]) => re.test(q))?.[1];
   const percent = q.match(/%\s?(\d+)|yüzde\s?(\d+)/);
+  const semantic = q.match(/kahve|araba|arabam|dijital|online|eğlenceye|ulaşıma/);
+  if (semantic && !percent) return { tool: "anlamsal_ara", input: { sorgu: semantic[0] } };
   if (percent && kategori) return { tool: "tasarruf_hesapla", input: { kategori, azaltma_yuzdesi: Number(percent[1] ?? percent[2]) } };
   if (/en büyük|en pahalı|en yüksek/.test(q)) return { tool: "en_buyuk_islemler", input: { adet: 3, ...(kategori ? { kategori } : {}) } };
   const seller = islemler.map((i) => i.satici).find((s) => q.includes(s.toLocaleLowerCase("tr").split(" ")[0]));
@@ -86,6 +90,12 @@ function demoText(plan, result, summary) {
       return r.islem_sayisi
         ? `${plan.input.satici} için ${r.islem_sayisi} işlem buldum, toplam ${fmt(r.net_toplam)}.`
         : `${plan.input.satici} adına bir işlem bulamadım.`;
+    case "anlamsal_ara":
+      return r.eslesmeler.length
+        ? `"${plan.input.sorgu}" ile ilgili şu harcamaları buldum:\n` +
+            r.eslesmeler.map((m) => `- ${m.satici} (${m.aciklama}): ${fmt(m.toplam)}`).join("\n") +
+            `\nToplam ${fmt(r.net_toplam)}.`
+        : `"${plan.input.sorgu}" ile ilgili bir harcama bulamadım.`;
     case "en_buyuk_islemler":
       return "En büyük harcamaların:\n" + r.islemler.map((i) => `- ${i.satici}: ${fmt(i.tutar)}`).join("\n");
     case "tasarruf_hesapla":
@@ -106,7 +116,7 @@ export async function streamCoachDemo({ summary, messages, islemler }, onEvent) 
   let result;
   if (plan.tool) {
     await new Promise((r) => setTimeout(r, 300));
-    result = runTool(plan.tool, plan.input, islemler);
+    result = await runTool(plan.tool, plan.input, islemler);
     const call = { name: plan.tool, input: plan.input, aciklama: result.aciklama, hata: result.hata ?? null };
     araclar.push(call);
     onEvent({ type: "tool", ...call });
@@ -117,6 +127,7 @@ export async function streamCoachDemo({ summary, messages, islemler }, onEvent) 
   }
   return {
     model: "demo",
+    temperature: 0.7,
     stop_reason: "demo",
     sure_ms: Date.now() - started,
     ilk_token_ms: plan.tool ? 335 : 35,

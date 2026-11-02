@@ -89,7 +89,10 @@ export function ExpensesScreen() {
           <View key={i.id} style={styles.rowBetween}>
             <View style={{ flex: 1 }}>
               <Text style={styles.rowLabel}>{i.satici}</Text>
-              <Text style={styles.small}>{kategoriLabel[i.kategori]}</Text>
+              <Text style={styles.small}>
+                {kategoriLabel[i.kategori]}
+                {i.aciklama ? ` · ${i.aciklama}` : ""}
+              </Text>
             </View>
             <Text style={[styles.rowValue, i.tip === "iade" && { color: colors.positive }]}>
               {i.tip === "iade" ? "+" : ""}

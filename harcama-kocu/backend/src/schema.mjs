@@ -50,6 +50,7 @@ export function validateTransaction(t) {
   const tarih = typeof t.tarih === "string" && /^\d{4}-\d{2}-\d{2}$/.test(t.tarih) ? t.tarih : null;
   return {
     satici: t.satici.trim(),
+    aciklama: typeof t.aciklama === "string" ? t.aciklama.trim().slice(0, 60) : "",
     tutar: Math.round(tutar * 100) / 100,
     para_birimi: t.para_birimi === "USD" || t.para_birimi === "EUR" ? t.para_birimi : "TRY",
     kategori: t.kategori,

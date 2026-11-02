@@ -7,11 +7,12 @@
   "scripts": {
     "start": "node --env-file=../../.env server.mjs",
     "demo": "DEMO_MODE=true node server.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "NODE_ENV=test node --test test/*.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "@huggingface/transformers": "^4.3.1"
   }
 }

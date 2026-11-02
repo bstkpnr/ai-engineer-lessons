@@ -3,6 +3,7 @@ import cors from "cors";
 import { maskSensitive } from "./src/mask.mjs";
 import { costOf, getStats, recordError, recordUsage } from "./src/stats.mjs";
 import { sanitizeIslemler } from "./src/tools.mjs";
+import { warmUpEmbeddings } from "./src/embeddings.mjs";
 
 const DEMO_MODE = process.env.DEMO_MODE === "true" || !process.env.ANTHROPIC_API_KEY;
 
@@ -91,6 +92,7 @@ app.post("/chat", async (req, res) => {
 
 const PORT = process.env.PORT ?? 3000;
 app.listen(PORT, "0.0.0.0", () => {
+  warmUpEmbeddings(); // Gün 8: Anlamsal arama modeli arka planda yükleniyor
   console.log(`Harcama Koçu API http://localhost:${PORT} adresinde çalışıyor`);
   console.log(DEMO_MODE ? "⚠️  DEMO MODU: API anahtarı yok, kural tabanlı taklit kullanılıyor." : `Model: ${process.env.MODEL ?? "claude-sonnet-5-5"}`);
 });

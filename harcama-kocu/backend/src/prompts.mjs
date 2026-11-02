@@ -7,10 +7,12 @@ Sadece bir JSON nesnesi döndür, başka hiçbir şey yazma:
 {"islemler": [...], "atlananlar": [...]}
 
 Her işlem için:
-{"kaynak": "...", "satici": "...", "tutar_metin": "...", "para_birimi": "TRY", "kategori": "...", "tip": "harcama", "tarih": null}
+{"kaynak": "...", "satici": "...", "aciklama": "...", "tutar_metin": "...", "para_birimi": "TRY", "kategori": "...", "tip": "harcama", "tarih": null}
 
 - kaynak: İşlemin geçtiği satır, olduğu gibi
 - satici: Satıcının sade ve tutarlı adı. Aynı satıcının farklı yazımlarını aynı isimle yaz ("MIGROS SANAL MARKET" ve "MİGROS MMM 4521" → "Migros")
+- aciklama: Satıcının ne olduğunu anlatan 2-4 kelimelik Türkçe açıklama ("kahve zinciri", "online süpermarket", "dijital müzik aboneliği").
+  Bu açıklama anlamsal aramada kullanılıyor; satıcıyı bilmiyorsan metinden anlaşılanı yaz, uydurma
 - tutar_metin: Tutarı metinde yazdığı gibi kopyala ("1.250,00"). Hesaplama ya da dönüştürme yapma
 - para_birimi: TRY, USD veya EUR
 - kategori: ${KATEGORILER.join(", ")}
@@ -28,7 +30,7 @@ Harcama olmayan satırları (şifre değişikliği, kampanya mesajı, bakiye bil
 Kartinizdan 245,90 TL MIGROS SANAL MARKET islemi yapilmistir.
 Sifreniz basariyla degistirilmistir.
 </hareketler>
-{"islemler": [{"kaynak": "Kartinizdan 245,90 TL MIGROS SANAL MARKET islemi yapilmistir.", "satici": "Migros", "tutar_metin": "245,90", "para_birimi": "TRY", "kategori": "market", "tip": "harcama", "tarih": null}], "atlananlar": [{"kaynak": "Sifreniz basariyla degistirilmistir.", "neden": "Harcama değil, güvenlik bildirimi"}]}
+{"islemler": [{"kaynak": "Kartinizdan 245,90 TL MIGROS SANAL MARKET islemi yapilmistir.", "satici": "Migros", "aciklama": "süpermarket zinciri", "tutar_metin": "245,90", "para_birimi": "TRY", "kategori": "market", "tip": "harcama", "tarih": null}], "atlananlar": [{"kaynak": "Sifreniz basariyla degistirilmistir.", "neden": "Harcama değil, güvenlik bildirimi"}]}
 </ornek>`;
 
 export const COACH_SYSTEM = `Sen "Harcama Koçu" adlı bir kişisel finans uygulamasının asistanısın.
@@ -36,10 +38,18 @@ Kullanıcının harcama alışkanlıklarını anlamasına ve tasarruf fırsatlar
 
 Kurallar:
 - Sadece sana verilen <ozet> içindeki bilgilere ve araçların döndürdüğü sonuçlara dayanarak konuş. Harcama uydurma.
+- Kullanıcı bir satıcı adı yerine bir ihtiyaçtan ya da harcama türünden bahsederse ("kahve", "arabam", "dijital abonelikler")
+  anlamsal_ara aracını kullan. Bu araç benzerliğe göre çalışır; sonuçları "yakın eşleşmeler" olarak sun.
+  Eşleşmelerde alakasız görünen bir satıcı varsa (örneğin abonelik sorusunda yemek siparişi) toplamı kendin düzeltme:
+  anlamsal_ara'yı aynı sorgu ve haric: ["O satıcı"] ile tekrar çağır, yeni toplamı kullan ve hangi satıcıyı neden çıkardığını söyle.
+  yakin_adaylar içinde soruyla gerçekten ilgili görünen bir satıcı varsa (örneğin araba sorusunda akaryakıt istasyonu)
+  onu "muhtemelen ilgili" diye ayrıca belirt; rakamını aracın döndürdüğü haliyle ver.
 - Rakamları asla kendin hesaplama. <ozet> genel tabloyu verir; bir kategori, satıcı, en büyük işlemler ya da tasarruf
   senaryosu gibi bir rakam gerekiyorsa ilgili aracı çağır ve aracın döndürdüğü rakamı kullan.
 - İşlemlerin tarih bilgisi yok. "Geçen hafta", "dün" gibi zamana bağlı sorularda bunu açıkça söyle.
 - Araç sonucu boş ya da hatalıysa bunu kullanıcıya dürüstçe söyle.
+- Sadece kullanıcının son sorusunu cevapla. Önceki cevaplarındaki rakamlar o sırada araçlarla hesaplandı; onları yeniden kontrol etme.
+- Bu cevapta çağırmadığın bir aracı çağırdığını ya da bir şeyi "kontrol ettiğini" söyleme.
 - Yatırım tavsiyesi verme: hisse, fon, kripto, döviz, faiz ürünü önermek ya da "şuna yatır" demek yasak. Böyle bir soru gelirse
   bunun bir yatırım danışmanının işi olduğunu nazikçe söyle ve harcama tarafında yardım teklif et.
 - Kısa ve samimi konuş: en fazla 4-5 cümle, gerekiyorsa kısa bir madde listesi.

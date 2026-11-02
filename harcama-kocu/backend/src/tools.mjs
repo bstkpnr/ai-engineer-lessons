@@ -1,6 +1,7 @@
 // Koçun kullanabileceği araçlar.
 // Koç hangi aracı ne zaman çağıracağına karar veriyor; hesabı her zaman bu kod yapıyor.
 import { KATEGORILER } from "./schema.mjs";
+import { semanticSearch } from "./semanticSearch.mjs";
 
 const KATEGORI_ADI = {
   market: "Market", yemek: "Yemek", ulasim: "Ulaşım", fatura: "Fatura", abonelik: "Abonelik",
@@ -31,6 +32,27 @@ export const TOOL_DEFINITIONS = [
       type: "object",
       properties: { satici: { type: "string", description: "Satıcı adı ya da adının bir parçası" } },
       required: ["satici"],
+    },
+  },
+  {
+    name: "anlamsal_ara",
+    description:
+      "Harcamaları kelimeye değil anlama göre arar. Kullanıcı satıcı adı yerine bir ihtiyaç ya da tür söylediğinde kullan: " +
+      "'kahve', 'arabam', 'dijital abonelikler', 'online alışveriş' gibi. Satıcının adı biliniyorsa bunun yerine satici_ara kullan. " +
+      "Sorguyu kullanıcının kelimesiyle bırakma; o ihtiyaç için yapılan harcamaların nasıl görüneceğini anlatan kısa bir ifade yaz " +
+      "(örneğin 'arabam' için 'araba yakıt akaryakıt benzin otopark bakım', 'dijital abonelikler' için 'aylık dijital abonelik video müzik yayın'). " +
+      "Döndürür: eslesmeler (benzerlik skorlarıyla, toplamları net_toplam'da) ve yakin_adaylar (eşiğin altında kalan, toplama girmeyen satıcılar).",
+    input_schema: {
+      type: "object",
+      properties: {
+        sorgu: { type: "string", description: "Aranan harcama türünü anlatan kısa ifade, örneğin 'kahve kafe kahve zinciri'" },
+        haric: {
+          type: "array",
+          items: { type: "string" },
+          description: "İsteğe bağlı: önceki aramada alakasız çıkan, sonuçtan çıkarılacak satıcı adları (aynen yazıldığı gibi)",
+        },
+      },
+      required: ["sorgu"],
     },
   },
   {
@@ -99,6 +121,23 @@ const TOOLS = {
     };
   },
 
+  async anlamsal_ara({ sorgu, haric }, islemler) {
+    const cikar = Array.isArray(haric) ? haric.slice(0, 10).map(String) : [];
+    const sonuc = await semanticSearch(String(sorgu), islemler, undefined, cikar);
+    // Eşik ayarı için terminalde skorları göster
+    if (sonuc.yontem === "anlamsal" && process.env.NODE_ENV !== "test") {
+      const fmtSkor = (m) => `${m.satici} ${m.skor}`;
+      console.log(`🔎 "${sorgu}" → eşleşme: [${sonuc.eslesmeler.map(fmtSkor).join(", ")}] aday: [${sonuc.yakin_adaylar.map(fmtSkor).join(", ")}]`);
+    }
+    const yedek = sonuc.yontem !== "anlamsal" ? " (yedek kelime araması)" : "";
+    return {
+      sonuc,
+      aciklama: sonuc.eslesmeler.length
+        ? `"${sorgu}" anlamına yakın ${sonuc.eslesmeler.length} satıcı buldu: ${sonuc.eslesmeler.map((m) => m.satici).join(", ")} · ${fmt(sonuc.net_toplam)}${cikar.length ? ` (${cikar.join(", ")} hariç)` : ""}${yedek}`
+        : `"${sorgu}" anlamına yakın bir harcama bulamadı${yedek}`,
+    };
+  },
+
   en_buyuk_islemler({ adet, kategori }, islemler) {
     const n = Math.min(Math.max(Math.round(adet) || 3, 1), 10);
     const liste = islemler
@@ -129,7 +168,7 @@ const TOOLS = {
 };
 
 // Modelden gelen araç çağrısını doğrulayıp çalıştırır. Hata olursa modele hata mesajı döner.
-export function runTool(name, input, islemler) {
+export async function runTool(name, input, islemler) {
   const tool = TOOLS[name];
   if (!tool) return { hata: `Bilinmeyen araç: ${name}`, aciklama: `Bilinmeyen bir araç istedi (${name})` };
   if (input?.kategori !== undefined && !KATEGORILER.includes(input.kategori)) {
@@ -138,8 +177,11 @@ export function runTool(name, input, islemler) {
   if (name === "satici_ara" && !String(input?.satici ?? "").trim()) {
     return { hata: "Satıcı adı boş olamaz", aciklama: "Boş bir satıcı adı aradı" };
   }
+  if (name === "anlamsal_ara" && !String(input?.sorgu ?? "").trim()) {
+    return { hata: "Arama metni boş olamaz", aciklama: "Boş bir arama yaptı" };
+  }
   try {
-    return tool(input ?? {}, islemler);
+    return await tool(input ?? {}, islemler);
   } catch (error) {
     return { hata: error.message, aciklama: `Araç çalışırken hata oluştu (${name})` };
   }
@@ -153,6 +195,7 @@ export function sanitizeIslemler(raw) {
     if (!KATEGORILER.includes(i.kategori) || !["harcama", "iade"].includes(i.tip)) return [];
     return [{
       satici: i.satici.slice(0, 80),
+      aciklama: typeof i.aciklama === "string" ? i.aciklama.slice(0, 80) : "",
       tutar: i.tutar,
       kategori: i.kategori,
       tip: i.tip,

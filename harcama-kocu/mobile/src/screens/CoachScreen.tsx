@@ -10,8 +10,8 @@ import type { ChatMessage } from "../types";
 
 const SUGGESTIONS = [
   "Bu ay neden bu kadar çok harcadım?",
-  "Migros'a toplam ne kadar harcadım?",
-  "En büyük 3 harcamam neler?",
+  "Kahveye ne kadar harcadım?",
+  "Dijital aboneliklerime ne kadar ödüyorum?",
   "Yemek siparişini %30 azaltsam ne kadar biriktiririm?",
 ];
 

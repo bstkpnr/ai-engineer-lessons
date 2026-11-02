@@ -1,4 +1,4 @@
-import { client, MODEL } from "./client.mjs";
+import { client, MODEL, sampling, sentTemperature, withTemperatureFallback } from "./client.mjs";
 import { COACH_SYSTEM } from "./prompts.mjs";
 import { runTool, TOOL_DEFINITIONS } from "./tools.mjs";
 
@@ -25,28 +25,33 @@ export async function streamCoach({ summary, messages, islemler }, onEvent) {
 
   for (; step < MAX_STEPS; step++) {
     let stepStarted = false;
-    const stream = client.messages.stream({
-      model: MODEL,
-      max_tokens: 2048,
-      tools: TOOL_DEFINITIONS,
-      system: [
-        { type: "text", text: COACH_SYSTEM },
-        // Araç tanımları + system prompt + özet aynı sohbet boyunca değişmiyor: önbelleğe uygun
-        { type: "text", text: `<ozet>\n${JSON.stringify(summary, null, 2)}\n</ozet>`, cache_control: { type: "ephemeral" } },
-      ],
-      messages: conversation,
-    });
+    const startStream = () => {
+      const stream = client.messages.stream({
+        model: MODEL,
+        max_tokens: 2048,
+        ...sampling(0.7),
+        tools: TOOL_DEFINITIONS,
+        system: [
+          { type: "text", text: COACH_SYSTEM },
+          // Araç tanımları + system prompt + özet aynı sohbet boyunca değişmiyor: önbelleğe uygun
+          { type: "text", text: `<ozet>\n${JSON.stringify(summary, null, 2)}\n</ozet>`, cache_control: { type: "ephemeral" } },
+        ],
+        messages: conversation,
+      });
 
-    stream.on("text", (delta) => {
-      if (firstTokenMs === null) firstTokenMs = Date.now() - started;
-      // Araç çağrısından önce ve sonra yazılan metinleri paragrafla ayır
-      if (!stepStarted && wroteText) onEvent({ type: "text", text: "\n\n" });
-      stepStarted = true;
-      wroteText = true;
-      onEvent({ type: "text", text: delta });
-    });
+      stream.on("text", (delta) => {
+        if (firstTokenMs === null) firstTokenMs = Date.now() - started;
+        // Araç çağrısından önce ve sonra yazılan metinleri paragrafla ayır
+        if (!stepStarted && wroteText) onEvent({ type: "text", text: "\n\n" });
+        stepStarted = true;
+        wroteText = true;
+        onEvent({ type: "text", text: delta });
+      });
+      return stream.finalMessage();
+    };
 
-    final = await stream.finalMessage();
+    // temperature reddi metin akmadan önce gelir; isteği onsuz tekrarlamak güvenli
+    final = await withTemperatureFallback(startStream);
     addUsage(usage, final.usage);
     if (final.stop_reason !== "tool_use") break;
 
@@ -55,7 +60,7 @@ export async function streamCoach({ summary, messages, islemler }, onEvent) {
 
     const results = [];
     for (const block of final.content.filter((b) => b.type === "tool_use")) {
-      const { sonuc, hata, aciklama } = runTool(block.name, block.input, islemler);
+      const { sonuc, hata, aciklama } = await runTool(block.name, block.input, islemler);
       const call = { name: block.name, input: block.input, aciklama, hata: hata ?? null };
       araclar.push(call);
       onEvent({ type: "tool", ...call });
@@ -75,6 +80,7 @@ export async function streamCoach({ summary, messages, islemler }, onEvent) {
 
   return {
     model: MODEL,
+    temperature: sentTemperature(0.7),
     stop_reason: final?.stop_reason ?? null,
     sure_ms: Date.now() - started,
     ilk_token_ms: firstTokenMs,

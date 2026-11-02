@@ -15,6 +15,7 @@ export type ParaBirimi = "TRY" | "USD" | "EUR";
 
 export type Islem = {
   satici: string;
+  aciklama?: string; // Yapay zekânın yazdığı kısa açıklama, anlamsal aramada kullanılıyor (Gün 8)
   tutar: number;
   para_birimi: ParaBirimi;
   kategori: Kategori;
@@ -35,6 +36,7 @@ export type Usage = {
 // Geliştirici modunda gösterilen "arka planda ne oldu" bilgisi
 export type Debug = {
   model: string;
+  temperature: number | null; // null: model bu ayarı desteklemiyor, gönderilmedi
   stop_reason: string | null;
   sure_ms: number;
   ilk_token_ms?: number | null;

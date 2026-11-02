@@ -21,6 +21,7 @@ export function DevPanel({ debug, title }: { debug?: Debug; title: string }) {
 
   const rows: [string, string][] = [
     ["model", debug.model],
+    ["temperature", debug.temperature == null ? "— (model desteklemiyor)" : String(debug.temperature)],
     ["input token", u ? String(u.input_tokens) : "— (demo)"],
     ["output token", u ? String(u.output_tokens) : "— (demo)"],
     ["prompt caching", cacheText],
@@ -28,7 +29,7 @@ export function DevPanel({ debug, title }: { debug?: Debug; title: string }) {
     ["stop_reason", debug.stop_reason ?? "—"],
     ["toplam süre", `${debug.sure_ms} ms`],
   ];
-  if (debug.ilk_token_ms != null) rows.splice(6, 0, ["ilk token", `${debug.ilk_token_ms} ms`]);
+  if (debug.ilk_token_ms != null) rows.splice(7, 0, ["ilk token", `${debug.ilk_token_ms} ms`]);
   if (debug.gecmis_mesaj_sayisi != null) rows.push(["modele giden mesaj", `${debug.gecmis_mesaj_sayisi} (geçmiş dahil)`]);
   if (debug.adim != null) rows.push(["model adımı", `${debug.adim} (araç çağrısı: ${debug.araclar?.length ?? 0})`]);
 

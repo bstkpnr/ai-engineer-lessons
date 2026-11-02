@@ -1,4 +1,4 @@
-import { client, MODEL } from "./client.mjs";
+import { client, MODEL, sampling, sentTemperature, withTemperatureFallback } from "./client.mjs";
 import { EXTRACT_SYSTEM } from "./prompts.mjs";
 import { validateTransaction } from "./schema.mjs";
 
@@ -10,12 +10,15 @@ function parseJson(text) {
 
 export async function extractTransactions(text) {
   const started = Date.now();
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 4096,
-    system: [{ type: "text", text: EXTRACT_SYSTEM, cache_control: { type: "ephemeral" } }],
-    messages: [{ role: "user", content: `<hareketler>\n${text}\n</hareketler>` }],
-  });
+  const response = await withTemperatureFallback(() =>
+    client.messages.create({
+      model: MODEL,
+      max_tokens: 4096,
+      ...sampling(0), // Veri çıkarmada yaratıcılık istemiyoruz (model destekliyorsa)
+      system: [{ type: "text", text: EXTRACT_SYSTEM, cache_control: { type: "ephemeral" } }],
+      messages: [{ role: "user", content: `<hareketler>\n${text}\n</hareketler>` }],
+    })
+  );
 
   const output = response.content.find((block) => block.type === "text")?.text;
   const parsed = parseJson(output);
@@ -36,6 +39,7 @@ export async function extractTransactions(text) {
     atlananlar,
     debug: {
       model: MODEL,
+      temperature: sentTemperature(0),
       stop_reason: response.stop_reason,
       sure_ms: Date.now() - started,
       usage: response.usage,

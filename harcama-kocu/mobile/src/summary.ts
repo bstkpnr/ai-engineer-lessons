@@ -70,5 +70,5 @@ export function buildSummary(islemler: KayitliIslem[]) {
 
 // Koçun araçlarının üzerinde çalışacağı sade işlem listesi
 export function toolPayload(islemler: KayitliIslem[]) {
-  return islemler.map(({ satici, tutar, kategori, tip, para_birimi }) => ({ satici, tutar, kategori, tip, para_birimi }));
+  return islemler.map(({ satici, aciklama, tutar, kategori, tip, para_birimi }) => ({ satici, aciklama, tutar, kategori, tip, para_birimi }));
 }
