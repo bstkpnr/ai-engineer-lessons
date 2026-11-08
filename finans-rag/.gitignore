@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Yerel vektör veritabanı ve ortam değişkenleri
+qdrant_data/
+.env
+
+# Banka dokümanlarının hakkı bankaya ait: repoya konmuyor, README'deki linklerden indiriliyor.
+# Kanun metni (resmi metin) repoda tutulabilir.
+data/*.pdf
+!data/kanun-5464.pdf
+qdrant_storage/

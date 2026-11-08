@@ -2,12 +2,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme";
 
-export type Tab = "add" | "expenses" | "coach";
+export type Tab = "add" | "expenses" | "coach" | "rag";
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
   { key: "add", label: "Ekle", icon: "＋" },
   { key: "expenses", label: "Harcamalar", icon: "▤" },
   { key: "coach", label: "Koç", icon: "✦" },
+  { key: "rag", label: "Doküman", icon: "§" },
 ];
 
 export function TabBar({ active, onChange }: { active: Tab; onChange: (tab: Tab) => void }) {

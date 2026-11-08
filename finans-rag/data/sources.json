@@ -1,0 +1,20 @@
+[
+  {
+    "file": "kanun-5464.pdf",
+    "title": "5464 sayılı Banka Kartları ve Kredi Kartları Kanunu",
+    "doc_type": "mevzuat",
+    "url": "https://www.mevzuat.gov.tr"
+  },
+  {
+    "file": "garanti-kredi-karti-sozlesmesi.pdf",
+    "title": "Garanti BBVA Kredi Kartı Sözleşmesi",
+    "doc_type": "sozlesme",
+    "url": "https://m.garantibbva.com.tr/content/dam/public-website/pdf/kart/kredi-karti-sozlesmesi.pdf"
+  },
+  {
+    "file": "garanti-ucret-tarifesi.pdf",
+    "title": "Garanti BBVA Bireysel Ürün ve Hizmet Ücretleri",
+    "doc_type": "tarife",
+    "url": "https://www.garantibbva.com.tr"
+  }
+]

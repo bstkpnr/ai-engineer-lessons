@@ -3,6 +3,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabBar, type Tab } from "./src/components/TabBar";
+import { RagScreen } from "./src/rag/RagScreen";
 import { AddScreen } from "./src/screens/AddScreen";
 import { CoachScreen } from "./src/screens/CoachScreen";
 import { ExpensesScreen } from "./src/screens/ExpensesScreen";
@@ -19,6 +20,7 @@ function Main() {
         {tab === "add" && <AddScreen onDone={() => setTab("expenses")} />}
         {tab === "expenses" && <ExpensesScreen />}
         {tab === "coach" && <CoachScreen />}
+        {tab === "rag" && <RagScreen />}
       </View>
       <TabBar active={tab} onChange={setTab} />
       <StatusBar style="dark" />

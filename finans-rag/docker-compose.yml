@@ -1,0 +1,11 @@
+# İsteğe bağlı: Qdrant'ı ayrı bir sunucu olarak çalıştırmak için.
+#   docker compose up -d
+#   QDRANT_URL=http://localhost:6333 uv run finans-rag-ingest
+# Panel: http://localhost:6333/dashboard
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage

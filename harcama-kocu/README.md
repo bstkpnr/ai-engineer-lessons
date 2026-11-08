@@ -25,6 +25,7 @@ Model SMS'ten tutarı metin olarak çıkarıyor (`"1.250,00"`), onu sayıya çev
 | 5 | System prompt, few-shot, JSON, doğrulama, injection | SMS'ten JSON çıkarma, her işlemin doğrulanması, hassas veri maskeleme, "yatırım tavsiyesi verme" kuralı |
 | 7 | Tool use (araç kullanımı) | Koç rakam gereken sorularda backend'deki araçları kendisi çağırıyor; hesabı kod yapıyor |
 | 8 | Embedding ve anlamsal arama | "Kahveye ne kadar harcadım?" gibi sorularda satıcı adı geçmese bile anlamca yakın harcamaları buluyor |
+| RAG | Dokümandan kaynak göstererek cevap | Doküman sekmesi: kanun ve kart sözleşmesine soru sorulur, cevap hangi belgenin hangi sayfasından geldiğiyle birlikte gelir ([finans-rag](../finans-rag)) |
 
 ## Koçun araçları (Gün 7)
 
@@ -58,6 +59,25 @@ SEMANTIC_MIN_SCORE=0.4   # Bu benzerliğin altındaki satıcılar eşleşme say�
 EMBEDDING_DTYPE=q8       # q8 = sıkıştırılmış (~120 MB), fp32 = tam (~470 MB)
 EMBEDDING_CACHE_DIR=...  # Modeli başka bir diske kaydetmek istersen
 ```
+
+## Doküman sekmesi: RAG
+
+Harcamalar kullanıcının kendi verisi; ama "Kartım çalınırsa sorumluluğum ne?", "Asgari ödeme nasıl belirlenir?" gibi soruların cevabı kanunda ve kart sözleşmesinde. Doküman sekmesi bu sorular için ayrı bir servis olan [finans-rag](../finans-rag)'e bağlanıyor: 5464 sayılı Banka Kartları ve Kredi Kartları Kanunu ile bir kredi kartı sözleşmesi parçalara bölünüp aranabilir hale getirilmiş durumda.
+
+| Cevap (`/ask`) | Kaynaklar | Geliştirici modu: ham JSON |
+|---|---|---|
+| ![RAG cevap](screenshots/5-rag-cevap.png) | ![RAG kaynaklar](screenshots/6-rag-kaynaklar.png) | ![RAG JSON](screenshots/7-rag-json.png) |
+
+| Arama (`/search`) ve skorlar | Sözleşmeden cevap | Kaynakta olmayan soru |
+|---|---|---|
+| ![RAG arama](screenshots/8-rag-arama.png) | ![RAG aidat](screenshots/9-rag-aidat.png) | ![RAG bulunamadı](screenshots/10-rag-bulunamadi.png) |
+
+- **Cevapla (`/ask`):** Soruya en yakın parçalar bulunur, model sadece bu parçalara dayanarak cevap yazar ve her bilgiyi `[1]`, `[2]` ile bir kaynağa bağlar. Her kaynak kartında belge adı, sayfa, madde ve parçanın metni görünür; "Belgeyi aç" orijinal PDF'e gider.
+- **Sadece ara (`/search`):** Model çağrılmaz; bulunan parçalar üç skorla listelenir: anlam benzerliği (embedding), kelime eşleşmesi (BM25) ve ikisini birleştiren RRF sıralama skoru. Bir cevabın neden o parçadan geldiğini görmek için.
+- **Kaynakta yoksa uydurmaz.** "Hisse senedi almalı mıyım?" gibi dokümanlarda olmayan bir soru "Kaynakta bulunamadı" etiketiyle döner, kaynak listesi boş kalır.
+- **Geliştirici modu** açıkken servisin döndürdüğü JSON ve isteğin süresi de gösterilir (Swagger'da görülenin aynısı).
+
+Uygulama finans-rag'e doğrudan bağlanıyor; Harcama Koçu backend'i bu akışta yer almıyor. Kurulum ve tasarım kararları için [finans-rag README](../finans-rag/README.md).
 
 ## Geliştirici modu
 
@@ -100,6 +120,15 @@ npx expo start
 
 Telefonunda **Expo Go** ile QR kodu okut. `.env` içindeki `EXPO_PUBLIC_API_URL` değerine `localhost` yerine bilgisayarının yerel ağ IP adresini yaz (macOS: `ipconfig getifaddr en0`). Telefon ve bilgisayar aynı Wi-Fi ağında olmalı.
 
+### 3. Doküman sekmesi için finans-rag (isteğe bağlı)
+
+```bash
+cd ../finans-rag
+uv run --env-file .env uvicorn finans_rag.api:app --reload --host 0.0.0.0 --port 8000
+```
+
+Mobil `.env` dosyasına `EXPO_PUBLIC_RAG_URL=http://<yerel-IP>:8000` ekle. `--host 0.0.0.0` olmadan servis sadece bilgisayarın kendisinden erişilebilir, telefon bağlanamaz. finans-rag çalışmıyorsa diğer sekmeler etkilenmez; Doküman sekmesi "finans-rag'e ulaşılamadı" der.
+
 ## Bilinçli olarak yapmadıkları
 
 - **Bankaya bağlanmıyor.** Kullanıcı veriyi kendisi yapıştırıyor.
@@ -128,6 +157,7 @@ mobile/
   src/summary.ts       Bütün hesaplar burada (model değil, kod)
   src/store.tsx        Uygulama durumu ve mükerrer kayıt kontrolü
   src/api.ts           Backend istemcisi ve streaming okuyucu
+  src/rag/             Doküman sekmesi: finans-rag istemcisi (/ask, /search, /health) ve ekranı
   src/screens/         Ekle, Harcamalar, Koç
   src/components/      Geliştirici paneli, sekme çubuğu, kartlar
 ```
