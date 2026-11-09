@@ -15,7 +15,8 @@ Her gün kendi klasöründe; yazıyı okurken ilgili klasördeki kodları çalı
 | 5| [System Prompt, Few-Shot ve Çıktı Doğrulama?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-5-system-prompt-few-shot-ve-%C3%A7%C4%B1kt%C4%B1-do%C4%9Frulama-e4fe86af895a?postPublishedType=initial) | [`gun-5`](./gun-5) |
 | 6| [5 Günde Öğrendiklerimle Bir Mini Uygulama?](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-6-5-g%C3%BCnde-%C3%B6%C4%9Frendiklerimle-bir-mini-uygulama-605b92cb4ac3?postPublishedType=initial) | [`gun-6`](./harcama-kocu) |
 | 7| [Koçuma Hesap Makinesi Verdim](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-7-ko%C3%A7uma-hesap-makinesi-verdim-af729110f2d1?postPublishedType=initial) | [`gun-7`](./harcama-kocu) |
-| 8| [Embedding ile Anlamsal Arama](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-embedding-ile-anlamsal-arama-a276aebf3835) | [`gun-7`](./harcama-kocu) |
+| 8| [Embedding ile Anlamsal Arama](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-embedding-ile-anlamsal-arama-a276aebf3835) | [`gun-8`](./harcama-kocu) |
+| 9| [RAG ile Dokümanlarla Konuşmak](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-9-rag-ile-dok%C3%BCmanlarla-konu%C5%9Fmak-daf6b54e9b6a) | [`gun-9`](./harcama-kocu) |
 
 ## Başlarken
 
