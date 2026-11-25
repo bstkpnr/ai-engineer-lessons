@@ -17,8 +17,8 @@ Her gün kendi klasöründe; yazıyı okurken ilgili klasördeki kodları çalı
 | 7| [Koçuma Hesap Makinesi Verdim](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-7-ko%C3%A7uma-hesap-makinesi-verdim-af729110f2d1?postPublishedType=initial) | [`gun-7`](./harcama-kocu) |
 | 8| [Embedding ile Anlamsal Arama](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-embedding-ile-anlamsal-arama-a276aebf3835) | [`gun-8`](./harcama-kocu) |
 | 9| [RAG ile Dokümanlarla Konuşmak](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-g%C3%BCn-9-rag-ile-dok%C3%BCmanlarla-konu%C5%9Fmak-daf6b54e9b6a) | [`gun-9`](./harcama-kocu) |
-| 10| [Agent’ı Ölçmek](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-agent%C4%B1-%C3%B6l%C3%A7mek-ce413f564a16) | [`gun-10`](./job-fit-agent) |
-| 11| [Agent’ın İçini Görmek, Dışarıya Açmak](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-agent%C4%B1n-i%CC%87%C3%A7ini-g%C3%B6rmek-d%C4%B1%C5%9Far%C4%B1ya-a%C3%A7mak-d3e3ec351cb4) | [`gun-11`](./job-fit-agent) |
+| 10| [Agent’ı Ölçmek](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-agent%C4%B1-%C3%B6l%C3%A7mek-ce413f564a16) | [`gun-10`](https://github.com/bstkpnr/job-fit-agent) |
+| 11| [Agent’ın İçini Görmek, Dışarıya Açmak](https://medium.com/@bstkpnr/ai-engineer-oluyoruz-agent%C4%B1n-i%CC%87%C3%A7ini-g%C3%B6rmek-d%C4%B1%C5%9Far%C4%B1ya-a%C3%A7mak-d3e3ec351cb4) | [`gun-11`](https://github.com/bstkpnr/job-fit-agent) |
 
 ## Başlarken
 
