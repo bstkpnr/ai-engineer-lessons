@@ -18,8 +18,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from .models import Chunk, Source
 
 # Kanun: "MADDE 26 –", "Madde 26-", "MADDE 26." gibi başlıklar
-MADDE_RE = re.compile(r"(?m)^(?:MADDE|Madde)\s+(\d+)\s*[-–—.:]?")
-# Sözleşme: "7.3. Geç Ödeme (Temerrüt)" gibi numaralı başlıklar. Numaranın her parçası en fazla
+MADDE_RE = re.compile(r"(?m)^(?:(GEÇİCİ|Geçici)\s+)?(?:MADDE|Madde)\s+(\d+)\s*[-–—.:]?")# Sözleşme: "7.3. Geç Ödeme (Temerrüt)" gibi numaralı başlıklar. Numaranın her parçası en fazla
 # iki hane: "251 TL Yıllık" gibi tablo satırları başlık sanılmasın.
 NUMBERED_RE = re.compile(r"(?m)^(\d{1,2}(?:\.\d{1,2})*)\.?\s+([A-ZÇĞİÖŞÜ][^\n]{2,90})$")
 MIN_SECTION_COUNT = 3  # Bu kadar başlık bulunamazsa doküman bu yapıda sayılmaz
@@ -58,7 +57,9 @@ def _make(source: Source, text: str, page: int, section: str | None, index: int)
 
 
 def _article_label(m: re.Match) -> str:
-    return f"Madde {m.group(1)}"
+    # 1. grup "GEÇİCİ" ön eki (yoksa None), 2. grup madde numarası
+    prefix = "Geçici " if m.group(1) else ""
+    return f"{prefix}Madde {m.group(2)}"
 
 
 def _numbered_label(m: re.Match) -> str:
