@@ -67,6 +67,8 @@ API belgeleri: http://localhost:8000/docs
 
 **Parçalama dokümanın yapısına göre seçiliyor.** Kanun ve sözleşmeler önce maddelere bölünüyor. Bir madde genelde tek bir konuyu anlattığı için aramada isabet artıyor, kaynak gösterirken de "Madde 26" denebiliyor. Uzun maddeler yine bölünüyor ama her parça hangi maddeye ait olduğunu biliyor. Madde yapısı olmayan dokümanlar sayfa sayfa, LangChain'in `RecursiveCharacterTextSplitter`'ı ile bölünüyor: önce paragraf, sonra satır, sonra cümle sınırından. Tablolu ücret tarifelerinde satırlar dağılmasın diye daha küçük parçalar kullanılıyor.
 
+**Geçici maddeler ayrı madde sayılıyor.** Kanunun sonundaki "GEÇİCİ MADDE 1-5" satırları başlangıçta ayrı bir madde olarak tanınmıyordu ve hepsi Madde 48'e yapışıyordu. Sonuç olarak borç yapılandırmasıyla ilgili bir bilgi, cevapta yanlış bir şekilde "Madde 48 (Yönetmelikler)" kaynağıyla gösteriliyordu. Hatayı ölçüm sırasında fark ettim. Artık bu parçalar "Geçici Madde 5" gibi doğru etiketleniyor.
+
 **Hibrit arama: anlam ve kelime birlikte.** İlk gerçek denemede "Kartım çalınırsa ne yapmalıyım?" sorusunda anlam araması "4.2 Çalınma ve Kaybetme" bölümünü ancak 5. sıraya koyabildi; ilk sırada alakasız "uçuş mili" bölümü vardı (skorlar 0.25-0.28, birbirine çok yakın). Oysa "çalın" kelimesi o bölümde birebir geçiyor. Bu yüzden her parça için bir de kelime vektörü (BM25) saklanıyor. İki aramanın skorları farklı ölçeklerde olduğu için doğrudan toplanmıyor; Reciprocal Rank Fusion ile sıralarına göre birleştiriliyor. Türkçe ekler için her kelimenin ilk 4 ve 5 harfi terim olarak alınıyor ("çalınırsa" ve "çalınması" → "çalın"; "faiz" ve "faizi" → "faiz").
 
 **"Cevap var mı" kararını skor değil model veriyor.** Aynı denemede alakasız "Hisse senedi almalı mıyım?" sorusu 0.45, alakalı "çalınma" sorusu 0.25 aldı: sabit bir benzerlik eşiği ikisini birden doğru ayıramaz. Eşik (`RAG_MIN_SCORE`) artık sadece kaba bir ön eleme. Model cevabını `{"cevaplanabildi": true/false, "cevap": "..."}` biçiminde veriyor; Pydantic ile doğrulanıyor ve `false` ise kaynak listesi boş dönüyor.
@@ -78,6 +80,33 @@ API belgeleri: http://localhost:8000/docs
 **Kaynak metinleri veri, talimat değil.** Parçalar modele `<kaynak>` etiketleri içinde veriliyor ve system prompt bu metinlerdeki talimatlara uyulmamasını söylüyor (prompt injection'a karşı).
 
 **Aynı doküman tekrar yüklenince kopya oluşmuyor.** Parça kimlikleri dosya adı, sayfa ve sıradan üretiliyor; tekrar yüklemek üzerine yazıyor.
+
+
+
+## Ölçüm (eval)
+
+Arama kalitesini ölçmek için `eval/questions.json` dosyasında 19 soru var: 16'sı dokümanlardan cevaplanabilir, 3'ü cevaplanamaz. Her soru için doğru cevabın hangi madde ya da başlıkta olduğu elle yazıldı. Ölçüt **Hit@5**: Doğru bölüm ilk 5 sonuç arasında mı?
+
+```bash
+uv run python eval/eval_rag.py
+```
+
+Aynı parçalar ve aynı embedding modeliyle üç arama yöntemi karşılaştırılıyor:
+
+| Yöntem | Hit@5 |
+| --- | --- |
+| Elle yazılmış hibrit arama (`store.py` + `keyword.py`) | 14/16 |
+| LangChain, varsayılan ayarlar (`QdrantVectorStore` + `BM25Retriever` + `EnsembleRetriever`) | 9/16 |
+| LangChain + Türkçe tokenizer (`keyword.terms` fonksiyonu `preprocess_func` olarak) | 13/16 |
+
+**Bulgular:**
+- Farkın büyük kısmı LangChain'den değil, Türkçe kelime işlemeden geliyor. `BM25Retriever` varsayılan olarak metni boşluklardan bölüyor. Bu yüzden "çalınırsa" ile "çalınma", "Limitimi" ile "limit" eşleşmiyor.
+- Türkçe tokenizer eklenince LangChain versiyonu elle yazılmış versiyona çok yaklaşıyor ve arama kodu yaklaşık 240 satırdan 40 satıra iniyor. Kalan fark, doğru bölümün sınırda (5./6. sıra) kaldığı sorulardan geliyor.
+- İki yöntemin de bulamadığı soru eş anlamlılık sorunu: "anlaşmazlık" diye sorulup kanunda "uyuşmazlık" yazdığında ne kelime araması ne de küçük embedding modeli bu bağı kurabiliyor.
+- 16 soruluk bir sette 1-2 soruluk fark kesin bir sonuç değil.
+
+Ücret tarifesi PDF'i ölçüme dahil değil.
+
 
 ## Testler
 
@@ -101,4 +130,8 @@ src/finans_rag/
   answer.py      Kaynak gösteren cevap üretimi
   api.py         FastAPI servisi
   ingest.py      Yükleme komutu
+  eval/
+  questions.json     Ölçüm soruları ve doğru kaynakları
+  eval_rag.py        Hit@5 ölçümü (üç yöntemi karşılaştırır)
+  langchain_rag.py   Aynı aramanın LangChain versiyonu
 ```
